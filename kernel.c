@@ -105,6 +105,26 @@ static int is_pvops_xen(void);
 static int get_linux_banner_from_vmlinux(char *, size_t);
 
 /*
+ * Determine Andriod GKI vmcore by reading "android" from ut->release.
+ * The prefix of Andriod GKI release version is:
+ *     Kernel Version - Android release version
+ * For example:
+ *     5.10.209-android12, 5.10.209-android12.1, 5.15.148-android13
+ */
+void
+parse_android_table(void)
+{
+    char *p;
+    if ((p = strstr(THIS_KERNEL_RELEASE, "android"))) {
+        sscanf(p, "android%d.%d", &at->android_version[0], &at->android_version[1]);
+
+        if (CRASHDEBUG(1))
+            fprintf(fp, "andriod_version: andriod-%d.%d\n",
+                    at->android_version[0], at->android_version[1]);
+    }
+}
+
+/*
  * popuplate the global kernel table (kt) with kernel version
  * information parsed from UTSNAME/OSRELEASE string
  */
@@ -297,6 +317,9 @@ kernel_init()
 		fprintf(fp, "  domainname: %s\n", printable_string(kt->utsname.domainname) ? 
 			kt->utsname.domainname : "(not printable)");
 	}
+
+	// non-upstream rel
+	parse_android_table();
 
 	strncpy(buf, kt->utsname.release, 65);
 	if (buf[64])

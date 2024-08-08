@@ -56,6 +56,13 @@ struct machdep_table machdep_table = { 0 };
 struct machdep_table *machdep = &machdep_table;
 
 /*
+ *  The same thing goes for accesses to the frequently-accessed android_table,
+ *  making the "at" pointers globally available.
+ */
+struct android_table android_table = { 0, 0 };
+struct android_table *at = &android_table;
+
+/*
  *  Command functions are entered with the args[] array and argcnt value 
  *  pre-set for issuance to getopt().
  */

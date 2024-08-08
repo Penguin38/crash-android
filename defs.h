@@ -829,6 +829,15 @@ struct kernel_table {                   /* kernel data */
 #define IS_KERNEL_STATIC_TEXT(x) (((ulong)(x) >= kt->stext) && \
 		  	          ((ulong)(x) < kt->etext))
 
+#define THIS_KERNEL_RELEASE (kt->utsname.release)
+
+struct android_table {
+	uint android_version[2];
+};
+#define IS_ANDROID_KERNEL_REL (at->android_version[0] > 0)
+#define THIS_ANDROID_VERSION ((at->android_version[0] << 16) + (at->android_version[1]))
+#define ANDROID(x,y) (((uint)(x) << 16) + (uint)(y))
+
 #define TASK_COMM_LEN 16     /* task command name length including NULL */
 
 struct task_context {                     /* context stored for each task */
@@ -5364,6 +5373,7 @@ extern struct vm_table vm_table, *vt;
 extern struct machdep_table *machdep;
 extern struct symbol_table_data symbol_table_data, *st;
 extern struct extension_table *extension_table;
+extern struct android_table android_table, *at;
 
 /*
  *  Generated in build_data.c

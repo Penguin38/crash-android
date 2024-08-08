@@ -1684,30 +1684,28 @@ arm64_get_section_size_bits(void)
 	int ret;
 	char *string;
 
-	if (THIS_KERNEL_VERSION >= LINUX(5,12,0)) {
+	if (arm64_get_vmcoreinfo(&machdep->section_size_bits, "NUMBER(SECTION_SIZE_BITS)", NUM_DEC))
+		goto exit;
+
+	if (THIS_KERNEL_VERSION >= LINUX(5,12,0)
+			|| (IS_ANDROID_KERNEL_REL
+				&& THIS_KERNEL_VERSION >= LINUX(5,10,0)
+				&& THIS_ANDROID_VERSION >= ANDROID(12,0)))
 		if (machdep->pagesize == 65536)
 			machdep->section_size_bits = _SECTION_SIZE_BITS_5_12_64K;
 		else
 			machdep->section_size_bits = _SECTION_SIZE_BITS_5_12;
-	} else
+	else
 		machdep->section_size_bits = _SECTION_SIZE_BITS;
 
-	if (arm64_get_vmcoreinfo(&machdep->section_size_bits, "NUMBER(SECTION_SIZE_BITS)", NUM_DEC)) {
-		/* nothing */
-	} else if (kt->ikconfig_flags & IKCONFIG_AVAIL) {
+	if (kt->ikconfig_flags & IKCONFIG_AVAIL) {
 		if ((ret = get_kernel_config("CONFIG_MEMORY_HOTPLUG", NULL)) == IKCONFIG_Y) {
 			if ((ret = get_kernel_config("CONFIG_HOTPLUG_SIZE_BITS", &string)) == IKCONFIG_STR)
 				machdep->section_size_bits = atol(string);
 		}
-
-		/* arm64: reduce section size for sparsemem */
-		if ((ret = get_kernel_config("CONFIG_ARM64_4K_PAGES", NULL)) == IKCONFIG_Y
-			|| (ret = get_kernel_config("CONFIG_ARM64_16K_PAGES", NULL)) == IKCONFIG_Y)
-			machdep->section_size_bits = _SECTION_SIZE_BITS_5_12;
-		else if ((ret = get_kernel_config("CONFIG_ARM64_64K_PAGES", NULL)) == IKCONFIG_Y)
-			machdep->section_size_bits = _SECTION_SIZE_BITS_5_12_64K;
 	}
 
+exit:
 	if (CRASHDEBUG(1))
 		fprintf(fp, "SECTION_SIZE_BITS: %ld\n", machdep->section_size_bits);
 }
