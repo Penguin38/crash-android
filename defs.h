@@ -3278,8 +3278,9 @@ typedef signed int s32;
 
 /*
  * 3-levels / 4K pages
+ * 39-bit VA
  */
-#define PTRS_PER_PGD_L3_4K   (512)
+#define PTRS_PER_PGD_L3_4K   ((1UL) << (39 - 30))
 #define PTRS_PER_PMD_L3_4K   (512)
 #define PTRS_PER_PTE_L3_4K   (512)
 #define PGDIR_SHIFT_L3_4K    (30)
@@ -3315,7 +3316,7 @@ typedef signed int s32;
  * 2-levels / 16K pages
  * 36-bit VA
  */
-#define PTRS_PER_PGD_L2_16K  (2048)
+#define PTRS_PER_PGD_L2_16K  ((1UL) << (36 - 25))
 #define PTRS_PER_PTE_L2_16K  (2048)
 #define PGDIR_SHIFT_L2_16K   (25)
 #define PGDIR_SIZE_L2_16K    ((1UL) << PGDIR_SHIFT_L2_16K)
@@ -3339,6 +3340,7 @@ typedef signed int s32;
 
 /*
  * 3-levels / 64K pages
+ * 48-bit, 52-bit VA
  */
 #define PTRS_PER_PGD_L3_64K  (64)
 #define PTRS_PER_PMD_L3_64K  (8192)
@@ -3353,8 +3355,9 @@ typedef signed int s32;
 
 /*
  * 2-levels / 64K pages
+ * 42-bit VA
  */
-#define PTRS_PER_PGD_L2_64K  (8192)
+#define PTRS_PER_PGD_L2_64K  ((1UL) << (42 - 29))
 #define PTRS_PER_PTE_L2_64K  (8192)
 #define PGDIR_SHIFT_L2_64K   (29)
 #define PGDIR_SIZE_L2_64K    ((1UL) << PGDIR_SHIFT_L2_64K)
