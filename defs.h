@@ -1089,7 +1089,7 @@ struct machdep_table {
         void (*get_irq_affinity)(int);
         void (*show_interrupts)(int, ulong *);
 	int (*is_page_ptr)(ulong, physaddr_t *);
-	int (*get_cpu_reg)(int, int, const char *, int, void *);
+	int (*get_current_task_reg)(int, const char *, int, void *);
 	int (*is_cpu_prstatus_valid)(int cpu);
 };
 
@@ -6089,7 +6089,7 @@ extern char *help_map[];
  *  task.c
  */ 
 void task_init(void);
-int set_context(ulong, ulong);
+int set_context(ulong, ulong, uint);
 void show_context(struct task_context *);
 ulong pid_to_task(ulong);
 ulong task_to_pid(ulong);
@@ -8124,5 +8124,8 @@ enum x86_64_regnum {
         FOP_REGNUM,
         LAST_REGNUM
 };
+
+/* crash_target.c */
+extern int gdb_change_thread_context (void);
 
 #endif /* !GDB_COMMON */
