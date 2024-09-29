@@ -4891,6 +4891,17 @@ arm64_set_va_bits_by_tcr(void)
 		 * vabits_actual = 64 - T1SZ;
 		 */
 		value = 64 - value;
+		/*
+		 *      vabits
+		 *        |
+		 *  |--------|--------|
+		 * 64       32        1
+		 */
+		if (value < 32) {
+			error(WARNING, "parse vabits_actual(%ld) invalid, maybe dec number.\n", value);
+			// DEC >> HEX
+			value = (value/10) * 16 + (value%10);
+		}
 		if (CRASHDEBUG(1))
 			fprintf(fp,  "vmcoreinfo : vabits_actual: %ld\n", value);
 		machdep->machspec->VA_BITS_ACTUAL = value;
