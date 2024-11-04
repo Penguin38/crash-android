@@ -75,7 +75,7 @@ void
 map_cpus_to_prstatus(void)
 {
 	void **nt_ptr;
-	int online, i, j, nrcpus;
+	int online, i, nrcpus;
 	size_t size;
 
 	if (pc->flags2 & QEMU_MEM_DUMP_ELF)  /* notes exist for all cpus */
@@ -100,9 +100,9 @@ map_cpus_to_prstatus(void)
 	 */
 	nrcpus = (kt->kernel_NR_CPUS ? kt->kernel_NR_CPUS : NR_CPUS);
 
-	for (i = 0, j = 0; i < nrcpus; i++) {
-		if (in_cpu_map(ONLINE_MAP, i) && machdep->is_cpu_prstatus_valid(i)) {
-			nd->nt_prstatus_percpu[i] = nt_ptr[j++];
+	for (i = 0; i < nrcpus; i++) {
+		if (machdep->is_cpu_prstatus_valid(i)) {
+			nd->nt_prstatus_percpu[i] = nt_ptr[i];
 			nd->num_prstatus_notes =
 				MAX(nd->num_prstatus_notes, i+1);
 		}
@@ -2780,6 +2780,10 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note64 = (Elf64_Nhdr *)nd->nt_prstatus;
+		if (!note64) {
+			error(INFO, "registers not collected for cpu %d\n", cpu);
+			return;
+		}
 		len = sizeof(Elf64_Nhdr);
 		len = roundup(len + note64->n_namesz, 4);
 		len = roundup(len + note64->n_descsz, 4);
@@ -2820,6 +2824,10 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note32 = (Elf32_Nhdr *)nd->nt_prstatus;
+		if (!note32) {
+			error(INFO, "registers not collected for cpu %d\n", cpu);
+			return;
+		}
 		len = sizeof(Elf32_Nhdr);
 		len = roundup(len + note32->n_namesz, 4);
 		len = roundup(len + note32->n_descsz, 4);
@@ -2857,6 +2865,10 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 		else
 			note64 = (Elf64_Nhdr *)nd->nt_prstatus;
 
+		if (!note64) {
+			error(INFO, "registers not collected for cpu %d\n", cpu);
+			return;
+		}
 		prs = (struct ppc64_elf_prstatus *)
 			((char *)note64 + sizeof(Elf64_Nhdr) + note64->n_namesz);
 		prs = (struct ppc64_elf_prstatus *)roundup((ulong)prs, 4);
@@ -2903,6 +2915,10 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note64 = (Elf64_Nhdr *)nd->nt_prstatus;
+		if (!note64) {
+			error(INFO, "registers not collected for cpu %d\n", cpu);
+			return;
+		}
 		len = sizeof(Elf64_Nhdr);
 		len = roundup(len + note64->n_namesz, 4);
 		len = roundup(len + note64->n_descsz, 4);
@@ -2982,15 +2998,10 @@ dump_registers_for_elf_dumpfiles(void)
 		return;
 	}
 
-        for (c = 0; c < kt->cpus; c++) {
-		if (check_offline_cpu(c)) {
-			fprintf(fp, "%sCPU %d: [OFFLINE]\n", c ? "\n" : "", c);
-			continue;
-		}
-
-                fprintf(fp, "%sCPU %d:\n", c ? "\n" : "", c);
-                display_regs_from_elf_notes(c, fp);
-        }
+	for (c = 0; c < kt->cpus; c++) {
+		fprintf(fp, "%sCPU %d: %s\n", c ? "\n" : "", c, check_offline_cpu(c) ? "[OFFLINE]" : "[ONLINE]");
+		display_regs_from_elf_notes(c, fp);
+	}
 }
 
 struct x86_64_user_regs_struct {
