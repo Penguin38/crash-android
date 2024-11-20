@@ -157,6 +157,7 @@ struct handle_each_vm_area_args {
 	unsigned int radix;
 	struct task_context *tc;
 	ulong *single_vma;
+	ulong vm_mm;
 };
 
 static char *memtype_string(int, int);
@@ -4265,9 +4266,16 @@ vm_area_dump(ulong task, ulong flag, ulong vaddr, struct reference *ref)
 
 		for (i = 0; i < entry_num; i++) {
 			if (!!(args.vma = (ulong)entry_list[i].value) &&
-			    handle_each_vm_area(&args)) {
-				FREEBUF(entry_list);
-				return args.vma;
+					!!IS_KVADDR(args.vma)) {
+				readmem(args.vma + OFFSET(vm_area_struct_vm_mm), KVADDR,
+						&args.vm_mm, sizeof(void *), "vm_area_struct vm_mm", FAULT_ON_ERROR);
+				if (!IS_KVADDR(args.vm_mm) || args.vm_mm != tm->mm_struct_addr)
+					continue;
+
+				if (handle_each_vm_area(&args)) {
+					FREEBUF(entry_list);
+					return args.vma;
+				}
 			}
 		}
 		FREEBUF(entry_list);
