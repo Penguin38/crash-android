@@ -2768,7 +2768,8 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 		}
 	}
 
-	if ((cpu - skipped_count) >= nd->num_prstatus_notes &&
+	if (((cpu < 0 ) || (!nd->nt_prstatus_percpu[cpu]) ||
+		(cpu - skipped_count) >= nd->num_prstatus_notes) &&
 	     !machine_type("MIPS")) {
 		error(INFO, "registers not collected for cpu %d\n", cpu);
 		return;
@@ -2780,10 +2781,6 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note64 = (Elf64_Nhdr *)nd->nt_prstatus;
-		if (!note64) {
-			error(INFO, "registers not collected for cpu %d\n", cpu);
-			return;
-		}
 		len = sizeof(Elf64_Nhdr);
 		len = roundup(len + note64->n_namesz, 4);
 		len = roundup(len + note64->n_descsz, 4);
@@ -2824,10 +2821,6 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note32 = (Elf32_Nhdr *)nd->nt_prstatus;
-		if (!note32) {
-			error(INFO, "registers not collected for cpu %d\n", cpu);
-			return;
-		}
 		len = sizeof(Elf32_Nhdr);
 		len = roundup(len + note32->n_namesz, 4);
 		len = roundup(len + note32->n_descsz, 4);
@@ -2865,10 +2858,6 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 		else
 			note64 = (Elf64_Nhdr *)nd->nt_prstatus;
 
-		if (!note64) {
-			error(INFO, "registers not collected for cpu %d\n", cpu);
-			return;
-		}
 		prs = (struct ppc64_elf_prstatus *)
 			((char *)note64 + sizeof(Elf64_Nhdr) + note64->n_namesz);
 		prs = (struct ppc64_elf_prstatus *)roundup((ulong)prs, 4);
@@ -2915,10 +2904,6 @@ display_regs_from_elf_notes(int cpu, FILE *ofp)
 				nd->nt_prstatus_percpu[cpu];
 		else
                 	note64 = (Elf64_Nhdr *)nd->nt_prstatus;
-		if (!note64) {
-			error(INFO, "registers not collected for cpu %d\n", cpu);
-			return;
-		}
 		len = sizeof(Elf64_Nhdr);
 		len = roundup(len + note64->n_namesz, 4);
 		len = roundup(len + note64->n_descsz, 4);
