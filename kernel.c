@@ -11468,7 +11468,7 @@ show_kernel_taints(char *buf, int verbose)
 	uint8_t tnt_bit;
 	char tnt_true, tnt_false;
 	int tnts_len = 0;
-	ulong tnts_addr;
+	ulong tnts_addr = 0;
 	ulong tainted_mask, *tainted_mask_ptr;
 	int tainted;
 	struct syment *sp = NULL;
@@ -11489,6 +11489,7 @@ show_kernel_taints(char *buf, int verbose)
 
 		tnts_len = get_array_length("tnts", NULL, 0);
 		sp = symbol_search("tnts");
+		tnts_addr = sp->value;
 	} else if (VALID_STRUCT(taint_flag) ||
 	    (kernel_symbol_exists("taint_flags") && STRUCT_EXISTS("taint_flag"))) {
 		if (!(VALID_STRUCT(taint_flag) &&
@@ -11510,10 +11511,10 @@ show_kernel_taints(char *buf, int verbose)
 
 		tnts_len = get_array_length("taint_flags", NULL, 0);
 		sp = symbol_search("taint_flags");
+		tnts_addr = sp->value;
 	} else if (verbose)
 		option_not_supported('t');
 
-	tnts_addr = sp->value;
 	get_symbol_data("tainted_mask", sizeof(ulong), &tainted_mask);
 	tainted_mask_ptr = &tainted_mask;
 
