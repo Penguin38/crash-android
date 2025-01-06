@@ -2239,8 +2239,11 @@ generic_is_uvaddr(ulong addr, struct task_context *tc)
 void
 raw_stack_dump(ulong stackbase, ulong size)
 {
-	display_memory(stackbase, size/sizeof(ulong), 
-	    	HEXADECIMAL|DISPLAY_DEFAULT|SYMBOLIC, KVADDR, NULL);
+	if (IS_KVADDR(stackbase))
+		display_memory(stackbase, size/sizeof(ulong),
+				HEXADECIMAL|DISPLAY_DEFAULT|SYMBOLIC, KVADDR, NULL);
+	else if (CRASHDEBUG(1))
+		error(INFO, "invalid kernel virtual address: %llx, %s fail!!\n", stackbase, __func__);
 }
 
 /*
