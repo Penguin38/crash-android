@@ -5518,6 +5518,7 @@ void cmd_s390dbf(void);
 #endif
 void cmd_map(void);          /* kvmdump.c */
 void cmd_ipcs(void);         /* ipcs.c */
+void cmd_rustfilt(void);     /* symbols.c */
 
 /*
  *  main.c
@@ -6125,6 +6126,7 @@ extern char *help_wr[];
 extern char *help_s390dbf[];
 #endif
 extern char *help_map[];
+extern char *help_rustfilt[];
 
 /*
  *  task.c
