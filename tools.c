@@ -4737,6 +4737,11 @@ do_xarray_iter(ulong node, uint height, char *path,
 	       ulong index, struct xarray_ops *ops)
 {
 	uint off;
+	if (!IS_KVADDR(node)) {
+		if (CRASHDEBUG(1))
+			error(INFO, "skip invalid xarray_node!!\n");
+		return;
+	}
 
 	if (!hq_enter(node))
 		error(FATAL,

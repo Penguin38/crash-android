@@ -352,6 +352,12 @@ static void do_mt_node(ulong entry, ulong min, ulong max,
 	if (SIZE(maple_node) > MAPLE_BUFSIZE)
 		error(FATAL, "MAPLE_BUFSIZE should be larger than maple_node struct");
 
+	if (!IS_KVADDR(maple_node)) {
+		if (CRASHDEBUG(1))
+			error(INFO, "skip invalid maple_node!!\n");
+		return;
+	}
+
 	readmem(maple_node, KVADDR, node_buf, SIZE(maple_node),
 		"mt_dump_node read maple_node", FAULT_ON_ERROR);
 
