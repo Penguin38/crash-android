@@ -673,6 +673,7 @@ vm_init(void)
         } else if (!VALID_STRUCT(kmem_slab_s) && 
 		   !VALID_STRUCT(slab_s) &&
 		   !MEMBER_EXISTS("kmem_cache", "cpu_slab") &&
+		   !MEMBER_EXISTS("kmem_cache", "cpu_sheaves") &&
 		   (VALID_STRUCT(slab) || (vt->flags & SLAB_OVERLOAD_PAGE))) {
                 vt->flags |= PERCPU_KMALLOC_V2;
 
@@ -817,7 +818,7 @@ vm_init(void)
 		if (INVALID_MEMBER(page_first_page))
 			ANON_MEMBER_OFFSET_INIT(page_first_page, "page", "first_page");
 
-	} else if (MEMBER_EXISTS("kmem_cache", "cpu_slab") &&
+	} else if ((MEMBER_EXISTS("kmem_cache", "cpu_slab") || MEMBER_EXISTS("kmem_cache", "cpu_sheaves")) &&
 		STRUCT_EXISTS("kmem_cache_node")) {
 		vt->flags |= KMALLOC_SLUB;
 
@@ -5280,6 +5281,9 @@ cmd_kmem(void)
 
 	if (sflag || Sflag || rflag || !(vt->flags & KMEM_CACHE_INIT))
 		kmem_cache_init();
+
+	if (Sflag && !MEMBER_EXISTS("kmem_cache", "cpu_slab"))
+		error(FATAL, "-S not supported for this kernel\n");
 
 	while (args[optind]) {
                 if (hexadecimal(args[optind], 0)) {
@@ -20412,7 +20416,6 @@ get_cpu_slab_ptr(struct meminfo *si, int cpu, ulong *cpu_freelist)
 
 	default:
 		cpu_slab_ptr = 0;
-		error(FATAL, "cannot determine location of kmem_cache.cpu_slab page\n");
 	}
 
 	return cpu_slab_ptr;
