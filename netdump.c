@@ -4659,7 +4659,12 @@ proc_kcore_init_32(FILE *fp, int kcore_fd)
 		clean_exit(1);
 	}
 
-	BCOPY(&eheader[0], &pkd->elf_header[0], pkd->header_size);	
+	if (read(fd, pkd->elf_header, pkd->header_size) != pkd->header_size) {
+		sprintf(buf, "/proc/kcore: read");
+		perror(buf);
+		goto bailout;
+	}
+
 	pkd->notes32 = (Elf32_Phdr *)&pkd->elf_header[elf32->e_phoff];
 	pkd->load32 = pkd->notes32 + 1;
 	pkd->flags |= KCORE_ELF32;
@@ -4733,7 +4738,12 @@ proc_kcore_init_64(FILE *fp, int kcore_fd)
 		clean_exit(1);
 	}
 
-	BCOPY(&eheader[0], &pkd->elf_header[0], pkd->header_size);	
+	if (read(fd, pkd->elf_header, pkd->header_size) != pkd->header_size) {
+		sprintf(buf, "/proc/kcore: read");
+		perror(buf);
+		goto bailout;
+	}
+
 	pkd->notes64 = (Elf64_Phdr *)&pkd->elf_header[elf64->e_phoff];
 	pkd->load64 = pkd->notes64 + 1;
 	pkd->flags |= KCORE_ELF64;
