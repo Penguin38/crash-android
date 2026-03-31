@@ -687,7 +687,7 @@ riscv64_vtop_3level_4k(ulong *pgd, ulong vaddr, physaddr_t *paddr, int verbose)
 
 	return TRUE;
 no_page:
-	fprintf(fp, "invalid\n");
+	fprintf(fp, "invalid for %lx address\n", vaddr);
 	return FALSE;
 }
 
@@ -1279,7 +1279,7 @@ riscv64_vtop_4level_4k(ulong *pgd, ulong vaddr, physaddr_t *paddr, int verbose)
 
 	return TRUE;
 no_page:
-	fprintf(fp, "invalid\n");
+	fprintf(fp, "invalid for %lx address\n", vaddr);
 	return FALSE;
 }
 
@@ -1368,7 +1368,7 @@ riscv64_vtop_5level_4k(ulong *pgd, ulong vaddr, physaddr_t *paddr, int verbose)
 
 	return TRUE;
 no_page:
-	fprintf(fp, "invalid\n");
+	fprintf(fp, "invalid for %lx address\n", vaddr);
 	return FALSE;
 }
 
