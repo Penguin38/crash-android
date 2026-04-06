@@ -3812,16 +3812,8 @@ typedef signed int s32;
 /*
  * Direct memory mapping
  */
-#define PTOV(X) 									\
-	(((unsigned long)(X)+(machdep->kvbase)) - machdep->machspec->phys_base)
-#define VTOP(X) ({									\
-	ulong _X = X;									\
-	(THIS_KERNEL_VERSION >= LINUX(5,13,0) &&					\
-		(_X) >= machdep->machspec->kernel_link_addr) ?				\
-		((unsigned long)(_X)-(machdep->machspec->va_kernel_pa_offset)): 	\
-		(((unsigned long)(_X)-(machdep->kvbase)) +				\
-		 machdep->machspec->phys_base);						\
-	})
+#define PTOV(X) riscv64_PTOV((ulong)(X))
+#define VTOP(X)	riscv64_VTOP((ulong)(X))
 #define PAGEBASE(X)		(((ulong)(X)) & (ulong)machdep->pagemask)
 
 /*
@@ -7221,6 +7213,8 @@ void riscv64_display_regs_from_elf_notes(int, FILE *);
 void riscv64_init(int);
 void riscv64_dump_machdep_table(ulong);
 int riscv64_IS_VMALLOC_ADDR(ulong);
+ulong riscv64_PTOV(ulong);
+ulong riscv64_VTOP(ulong);
 
 #define display_idt_table() \
 	error(FATAL, "-d option is not applicable to RISCV64 architecture\n")

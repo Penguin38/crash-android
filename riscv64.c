@@ -1606,6 +1606,30 @@ riscv64_uvtop(struct task_context *tc, ulong uvaddr, physaddr_t *paddr, int verb
 	}
 }
 
+ulong riscv64_PTOV(ulong paddr)
+{
+	ulong vaddr;
+	ulong offset = paddr - machdep->machspec->phys_base;
+
+	vaddr = offset + machdep->kvbase;
+
+	return vaddr;
+}
+
+ulong
+riscv64_VTOP(ulong addr)
+{
+	ulong paddr;
+
+	if ( (THIS_KERNEL_VERSION >= LINUX(5,13,0)) &&
+			(addr >= machdep->machspec->kernel_link_addr))
+		paddr = (addr - (machdep->machspec->va_kernel_pa_offset));
+	else
+		paddr = (addr - (ulong)machdep->kvbase + machdep->machspec->phys_base);
+
+	return paddr;
+}
+
 static int
 riscv64_kvtop(struct task_context *tc, ulong kvaddr, physaddr_t *paddr, int verbose)
 {
