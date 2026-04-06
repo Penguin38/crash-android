@@ -321,6 +321,7 @@ gdb_merge: force
 	@if [ ! -f ${PROGRAM} ]; then \
 	  echo; echo "${PROGRAM} build failed"; \
 	  echo; exit 1; fi
+	@mv -f ${PROGRAM} crash-android
 
 rebuild:
 	@if [ ! -f ${GDB}/${GDB}.patch ]; then \
@@ -366,7 +367,7 @@ clean: make_configure
 	@$(MAKE) do_clean
 
 do_clean:
-	rm -f ${OBJECT_FILES} ${DAEMON_OBJECT_FILES} ${PROGRAM} ${PROGRAM}lib.a ${GDB_OFILES}
+	rm -f ${OBJECT_FILES} ${DAEMON_OBJECT_FILES} ${PROGRAM} ${PROGRAM}lib.a ${GDB_OFILES} crash-android
 	@$(MAKE) -C extensions -i clean
 	@$(MAKE) -C memory_driver -i clean
 

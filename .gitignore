@@ -27,3 +27,6 @@ TAGS
 
 # Clang's compilation database file
 /compile_commands.json
+
+crash-android
+install.sh
