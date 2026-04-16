@@ -5701,7 +5701,7 @@ is_livepatch(void)
 {
 	int i;
 	struct load_module *lm;
-	char buf[BUFSIZE];
+	char buf[BUFSIZE] = {0};
 
 	show_kernel_taints(buf, !VERBOSE);
 	if (strstr(buf, "K"))  /* TAINT_LIVEPATCH */
