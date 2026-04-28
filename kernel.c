@@ -3658,9 +3658,11 @@ module_init(void)
 	case KMOD_V2: 
 		MEMBER_OFFSET_INIT(module_num_syms, "module", "num_syms");
 		MEMBER_OFFSET_INIT(module_list, "module", "list");
-        	MEMBER_OFFSET_INIT(module_gpl_syms, "module", "gpl_syms");
-        	MEMBER_OFFSET_INIT(module_num_gpl_syms, "module", 
-			"num_gpl_syms");
+		if (MEMBER_EXISTS("module", "gpl_syms")) {
+			MEMBER_OFFSET_INIT(module_gpl_syms, "module", "gpl_syms");
+			MEMBER_OFFSET_INIT(module_num_gpl_syms, "module",
+				"num_gpl_syms");
+		}
 
 		if (MEMBER_EXISTS("module", "mem")) {	/* 6.4 and later */
 			kt->flags2 |= KMOD_MEMORY;	/* MODULE_MEMORY() can be used. */
@@ -3854,8 +3856,9 @@ module_init(void)
                 	nsyms = UINT(modbuf + OFFSET(module_nsyms));
 			break;
 		case KMOD_V2: 
-                	nsyms = UINT(modbuf + OFFSET(module_num_syms)) +
-				UINT(modbuf + OFFSET(module_num_gpl_syms));
+			nsyms = UINT(modbuf + OFFSET(module_num_syms));
+			if (VALID_MEMBER(module_num_gpl_syms))
+				nsyms += UINT(modbuf + OFFSET(module_num_gpl_syms));
 			break;
 		}
 

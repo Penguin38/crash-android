@@ -1979,9 +1979,14 @@ store_module_symbols_6_4(ulong total, int mods_installed)
 			"module buffer", FAULT_ON_ERROR);
 
 		syms = ULONG(modbuf + OFFSET(module_syms));
-		gpl_syms = ULONG(modbuf + OFFSET(module_gpl_syms));
 		nsyms = UINT(modbuf + OFFSET(module_num_syms));
-		ngplsyms = UINT(modbuf + OFFSET(module_num_gpl_syms));
+		if (VALID_MEMBER(module_gpl_syms)) {
+			gpl_syms = ULONG(modbuf + OFFSET(module_gpl_syms));
+			ngplsyms = UINT(modbuf + OFFSET(module_num_gpl_syms));
+		} else {
+			gpl_syms = 0;
+			ngplsyms = 0;
+		}
 
 		nksyms = UINT(modbuf + OFFSET(module_num_symtab));
 
