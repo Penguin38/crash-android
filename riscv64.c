@@ -1241,7 +1241,7 @@ riscv64_vtop_4level_4k(ulong *pgd, ulong vaddr, physaddr_t *paddr, int verbose)
 
 	/* PMD */
 	FILL_PMD(PAGEBASE(pmd_base), PHYSADDR, PAGESIZE());
-	pmd_addr = pmd_base + sizeof(pmd_t) + pmd_index_l4_4k(vaddr);
+	pmd_addr = pmd_base + sizeof(pmd_t) * pmd_index_l4_4k(vaddr);
 	pmd_val = ULONG(machdep->pmd + PAGEOFFSET(pmd_addr));
 	if (verbose)
 		fprintf(fp, "  PMD: %016lx => %016lx\n", pmd_addr, pmd_val);
