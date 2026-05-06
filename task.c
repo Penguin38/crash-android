@@ -739,6 +739,18 @@ irqstacks_init(void)
 	if (!(tt->softirq_tasks = (ulong *)calloc(NR_CPUS, sizeof(ulong))))
 		error(FATAL, "cannot malloc softirq_tasks space.");
 
+	/*
+	 *  With the stack size adjusted from 16k to 32k for ppc64le,
+	 *  such as rhel-9.4.z. We need to ensure that SIZE(irq_ctx) is
+	 *  correctly set so the unwinder doesn't prematurely bail
+	 *  when switching between the kernel stack and irq stacks.
+	 *  The stack size is updated in task_init(), which calls
+	 *  this routine, irqstacks_init() after checking for the
+	 *  existence of irq_ctx.
+	 */
+	if (STACKSIZE() > SIZE(irq_ctx))
+		ASSIGN_SIZE(irq_ctx) = STACKSIZE();
+
 	thread_info_buf = GETBUF(SIZE(irq_ctx));
 
 	if ((hard_sp = per_cpu_symbol_search("per_cpu__hardirq_ctx")) ||
