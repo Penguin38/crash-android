@@ -2990,9 +2990,12 @@ store_module_kallsyms_v2(struct load_module *lm, int start, int curr,
 		 * or '$x' for ARM64, and '$d'.
 		 * On LoongArch we have linker mapping symbols like '.L'
 		 * or 'L0'.
+		 * On RISCV64 we have linker mapping symbols like '.L',
+		 * 'L0' or '$'.
 		 * Make sure that these don't end up into our symbol list.
 		 */
-		if ((machine_type("ARM") || machine_type("ARM64") || machine_type("LOONGARCH64")) &&
+		if ((machine_type("ARM") || machine_type("ARM64") || machine_type("LOONGARCH64") ||
+		     machine_type("RISCV64")) &&
 		    !machdep->verify_symbol(nameptr, ec->st_value, ec->st_info))
 			continue;
 

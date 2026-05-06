@@ -209,15 +209,23 @@ riscv64_cmd_mach(void)
 static int
 riscv64_verify_symbol(const char *name, ulong value, char type)
 {
-	if (CRASHDEBUG(8) && name && strlen(name))
+	if (!name || !strlen(name))
+		return FALSE;
+
+	if (CRASHDEBUG(8))
 		fprintf(fp, "%08lx %s\n", value, name);
+
+	/* Filter out mapping symbols */
+	if ((name[0] == '.' && name[1] == 'L') ||
+	    (name[0] == 'L' && name[1] == '0') ||
+	    (name[0] == '$'))
+		return FALSE;
 
 	if (!(machdep->flags & KSYMS_START)) {
 		if (STREQ(name, "_text") || STREQ(name, "_stext"))
 			machdep->flags |= KSYMS_START;
 
-		return (name && strlen(name) && !STRNEQ(name, "__func__.") &&
-			!STRNEQ(name, "__crc_"));
+		return (!STRNEQ(name, "__func__.") && !STRNEQ(name, "__crc_"));
 	}
 
 	return TRUE;
