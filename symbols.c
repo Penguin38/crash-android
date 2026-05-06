@@ -1170,16 +1170,19 @@ symname_hash_init(void)
 static unsigned int
 symname_hash_index(char *name)
 {
-	unsigned int len, value;
-	unsigned char *array = (unsigned char *)name;
+	unsigned int hash = 2166136261U;
+	unsigned char *p = (unsigned char *)name;
 
-	len = strlen(name);
-	if (!len)
+	if (!*p)
 		error(FATAL, "The length of the symbol name is zero!\n");
 
-	value = array[len - 1] * array[len / 2];
+	/* FNV-1a hash algorithm for better distribution */
+	while (*p) {
+		hash ^= *p++;
+		hash *= 16777619;
+	}
 
-	return (array[0] ^ value) % SYMNAME_HASH;
+	return hash % SYMNAME_HASH;
 }
 
 /*
