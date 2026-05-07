@@ -278,6 +278,7 @@ kernel_init()
 	
 	MEMBER_OFFSET_INIT(timekeeper_xtime, "timekeeper", "xtime");
 	MEMBER_OFFSET_INIT(timekeeper_xtime_sec, "timekeeper", "xtime_sec");
+	MEMBER_OFFSET_INIT(tk_data_timekeeper, "tk_data", "timekeeper");
 	get_xtime(&kt->date);
 	if (CRASHDEBUG(1))
 		fprintf(fp, "xtime timespec.tv_sec: %lx: %s\n", 
@@ -11157,7 +11158,18 @@ get_xtime(struct timespec *date)
 	struct syment *sp;
 	uint64_t xtime_sec;
 
-	if (VALID_MEMBER(timekeeper_xtime) &&
+	if (VALID_MEMBER(tk_data_timekeeper) &&
+	    VALID_MEMBER(timekeeper_xtime_sec)) {
+		long offset = OFFSET(tk_data_timekeeper) +
+			OFFSET(timekeeper_xtime_sec);
+		if ((sp = kernel_symbol_search("timekeeper_data")) ||
+		    (sp = kernel_symbol_search("tk_core"))) {
+			readmem(sp->value + offset, KVADDR,
+				&xtime_sec, sizeof(uint64_t),
+				"tk_data timekeeper xtime_sec", RETURN_ON_ERROR);
+			date->tv_sec = (__time_t)xtime_sec;
+		}
+	} else if (VALID_MEMBER(timekeeper_xtime) &&
 	    (sp = kernel_symbol_search("timekeeper"))) {
                 readmem(sp->value + OFFSET(timekeeper_xtime), KVADDR, 
 			date, sizeof(struct timespec),
