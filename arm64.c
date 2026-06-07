@@ -5360,16 +5360,16 @@ arm64_set_va_bits_by_tcr(void)
 		 * vabits_actual = 64 - T1SZ;
 		 */
 		value = 64 - value;
-		/*
-		 *      vabits
-		 *        |
-		 *  |--------|--------|
-		 * 64       32        1
-		 */
-		if (value < 32) {
+
+		static const int valid_va_bits[] = {36, 39/*, 42*/, 47, 48/*, 52*/};
+		if (value != valid_va_bits[0]
+				&& value != valid_va_bits[1]
+				&& value != valid_va_bits[2]
+				&& value != valid_va_bits[3]) {
 			error(WARNING, "parse vabits_actual(%ld) invalid, maybe dec number.\n", value);
-			// DEC >> HEX
-			value = (value/10) * 16 + (value%10);
+			// HEX >> DEC
+			value = 64 - value;
+			value = 64 - ((value/16) * 10 + (value%16));
 		}
 		if (CRASHDEBUG(1))
 			fprintf(fp,  "vmcoreinfo : vabits_actual: %ld\n", value);
