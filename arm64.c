@@ -5040,7 +5040,50 @@ arm64_get_crash_notes(void)
 	ulong *notes_ptrs;
 	ulong i, found;
 
-	if (!symbol_exists("crash_notes")) {
+	/*
+	 * If note_buf_t doesn't exist in debug info (e.g. stripped vmlinux),
+	 * we can't read crash_notes from kernel memory. Fall back to reading
+	 * NT_PRSTATUS notes directly from the dumpfile's ELF headers.
+	 */
+	if (!symbol_exists("note_buf_t") || INVALID_SIZE(note_buf)) {
+		error(WARNING,
+			"note_buf_t does not exist in this kernel's debug info; "
+			"falling back to diskdump/kdump prstatus notes\n");
+		if (!(ms->panic_task_regs = calloc((size_t)kt->cpus, sizeof(struct arm64_pt_regs))))
+			error(FATAL, "cannot calloc panic_task_regs space\n");
+
+		for (i = found = 0; i < kt->cpus; i++) {
+			if (DISKDUMP_DUMPFILE())
+				note = diskdump_get_prstatus_percpu(i);
+			else if (KDUMP_DUMPFILE())
+				note = netdump_get_prstatus_percpu(i);
+
+			if (!note) {
+				error(WARNING, "cpu %d: cannot find NT_PRSTATUS note\n", i);
+				continue;
+			}
+
+			/*
+			 * Read the register set from the ELF note's data area.
+			 * The note structure contains: Elf64_Nhdr + name (16 bytes, padded)
+			 * + elf_prstatus (the pr_reg field contains arm64_pt_regs).
+			 */
+			p = (char *)note + sizeof(Elf64_Nhdr);
+			p += roundup(note->n_namesz, 4);
+			BCOPY(p + OFFSET(elf_prstatus_pr_reg), &ms->panic_task_regs[i],
+			      sizeof(struct arm64_pt_regs));
+
+			found++;
+		}
+
+		if (!found) {
+			free(ms->panic_task_regs);
+			ms->panic_task_regs = NULL;
+		}
+		return;
+		}
+
+		if (!symbol_exists("crash_notes")) {
 		if (DISKDUMP_DUMPFILE() || KDUMP_DUMPFILE()) {
 			if (!(ms->panic_task_regs = calloc((size_t)kt->cpus, sizeof(struct arm64_pt_regs))))
 				error(FATAL, "cannot calloc panic_task_regs space\n");
